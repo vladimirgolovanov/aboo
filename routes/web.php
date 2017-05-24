@@ -18,3 +18,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::get('/post/create/{postGroup}', ['as' => 'post.create', 'uses' => 'PostController@create']);
+Route::get('/post/create_post_group/{createPostGroup}', ['as' => 'post.create_post_group', 'uses' => 'PostController@create']);
+Route::resource('post', 'PostController', ['except' => ['create']]);

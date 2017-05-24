@@ -11,6 +11,6 @@ class PostGroupType extends Model
 
     public function postGroups()
     {
-        return $this->hasMany('App\PostGroup', 'post_group_type_id', 'id');
+        return $this->hasMany('App\PostGroup');
     }
 }

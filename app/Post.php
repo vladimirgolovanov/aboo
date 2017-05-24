@@ -9,8 +9,14 @@ class Post extends Model
     protected $table = 'posts';
     public $timestamps = true;
 
+    protected $fillable = [
+        'post_group_id',
+        'text',
+        'text_parsed',
+    ];
+
     public function postGroup()
     {
-        return $this->belongsTo('App\PostGroup', 'id', 'post_group_id');
+        return $this->belongsTo('App\PostGroup');
     }
 }
