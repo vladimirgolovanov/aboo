@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Post;
 use App\PostGroup;
 use App\PostGroupType;
+use App\Image;
 use Illuminate\Http\Request;
+use \Illuminate\Support\Facades\Storage;
 use Auth;
 
 class PostController extends Controller
@@ -34,9 +36,9 @@ class PostController extends Controller
                 echo '<br>';
             } else {
                 foreach ($groupedPosts[$postGroupType->id] as $post) {
+                    echo '<a href="'.route('post.show', ['post' => $post->id]).'">[';
                     echo $post->text_parsed;
-                    echo ' ';
-                    echo '<a href="'.route('post.edit', ['post' => $post->id]).'">edit</a>';
+                    echo ']</a>';
                     echo '<br>';
                 }
                 echo '<a href="'.route('post.create', ['postGroup' => $postGroupType->id]).'">add item</a>';
@@ -64,7 +66,11 @@ class PostController extends Controller
     {
         $userId = Auth::id();
 
-        return view('post.collection.create', ['postGroup' => $postGroup]);
+        $post = new Post;
+        $post->post_group_id = $postGroup->id;
+        $post->save();
+
+        return redirect()->route('post.show', ['post' => $post]);
     }
 
     public function store(Request $request)
@@ -84,18 +90,69 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
-        echo route('post.edit', ['post' => $post->id]);
-    }
+        $postImages = $post->images()->get();
 
-    public function edit(Post $post)
-    {
-        return view('post.collection.edit', ['post' => $post]);
+        return view('post.item', ['post' => $post, 'postImages' => $postImages]);
     }
 
     public function update(Request $request, Post $post)
     {
         $input = $request->all();
 
+        $post->text = $input['text'];
+        $post->text_parsed = nl2br($input['text']);
+        $post->save();
+
+        if ($request->file('image')) {
+            $imagePath = $request->file('image')->store('images/post/'.Auth::id().'/'.$post->id);
+
+            $image = new Image;
+            $image->path = $imagePath;
+            $image->post_id = $post->id;
+            $image->save();
+        }
+
+        return response()->json([
+            'success' => 'success'
+        ]);
+    }
+
+    public function uploadImage(Request $request)
+    {
+        $input = $request->all();
+        $postId = $input['post_id'];
+
+        if (!$postId) {
+            return false; // add exception
+        }
+
+        if ($request->file('image')) {
+            $imagePath = $request->file('image')->store('images/post/'.Auth::id().'/'.$postId);
+
+            $image = new Image;
+            $image->path = $imagePath;
+            $image->post_id = $postId;
+            $image->save();
+        }
+
+        return json_encode([
+            'id' => $image->id,
+            'path' => $image->path,
+            'destroy_image_route' => route('post.destroy_image', ['image' => $image->id]),
+        ]);
+    }
+
+    public function saveText(Request $request)
+    {
+        $input = $request->all();
+        $postId = $input['post_id'];
+        $text = $input['text'];
+
+        if (!$postId) {
+            return false; // add exception
+        }
+
+        $post = Post::find($postId);
         $post->text = $input['text'];
         $post->text_parsed = nl2br($input['text']);
         $post->save();
@@ -108,5 +165,21 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         //
+    }
+
+    /**
+     * @todo: make Route::delete
+     */
+    public function destroyImage(Image $image)
+    {
+        if (Storage::exists($image->path)) {
+            Storage::delete($image->path);
+        }
+
+        $image->delete();
+
+        return response()->json([
+            'success' => 'success'
+        ]);
     }
 }

@@ -15,6 +15,11 @@ class Post extends Model
         'text_parsed',
     ];
 
+    public function images()
+    {
+        return $this->hasMany('App\Image');
+    }
+
     public function postGroup()
     {
         return $this->belongsTo('App\PostGroup');

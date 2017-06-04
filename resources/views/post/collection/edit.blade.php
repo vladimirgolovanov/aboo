@@ -7,7 +7,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Edit post</div>
                 <div class="panel-body">
-                    <form class="form-horizontal" role="form" method="POST" action="{{ route('post.update', ['post' => $post->id]) }}">
+                    <form class="form-horizontal" role="form" method="POST" enctype="multipart/form-data" action="{{ route('post.update', ['post' => $post->id]) }}">
                         {{ csrf_field() }}
                         {{ method_field('PATCH') }}
 
@@ -20,6 +20,29 @@
                                 @if ($errors->has('text'))
                                     <span class="help-block">
                                         <strong>{{ $errors->first('text') }}</strong>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+
+                        @foreach($postImages as $postImage)
+                    	<div class="form-group">
+                    		<div class="col-md-6 col-md-offset-4">
+                    			<img src="/storage/{{ $postImage->path }}">
+                    			<a href="{{ route('post.destroy_image', ['image' => $postImage]) }}">del</a>
+                    		</div>
+                    	</div>
+                        @endforeach
+
+                        <div class="form-group{{ $errors->has('image') ? ' has-error' : '' }}">
+                            <label for="image" class="col-md-4 control-label">Image</label>
+
+                            <div class="col-md-6">
+                                <input id="image" type="file" class="form-control" name="image">
+
+                                @if ($errors->has('image'))
+                                    <span class="help-block">
+                                        <strong>{{ $errors->first('image') }}</strong>
                                     </span>
                                 @endif
                             </div>
