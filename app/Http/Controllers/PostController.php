@@ -17,7 +17,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $postGroupTypes = PostGroupType::select('post_groups.id', 'post_group_types.name')
+        $postGroupTypes = PostGroupType::select('post_groups.id', 'post_group_types.name', 'post_groups.post_group_type_id')
                                        ->leftJoin('post_groups', 'post_group_types.id', '=', 'post_groups.post_group_type_id')
                                        ->where('post_groups.user_id', Auth::id())
                                        ->orWhereNull('post_groups.user_id')
@@ -28,23 +28,17 @@ class PostController extends Controller
         $groupedPosts = $posts->groupBy('post_group_id');
 
         foreach ($postGroupTypes as $postGroupType) {
-            echo '<hr>';
-            echo $postGroupType->name;
-            echo '<br>';
-            if (!$postGroupType->id) {
-                echo '<a href="'.route('post.create_post_group', ['postGroupType' => $postGroupType->id]).'">create group</a>';
-                echo '<br>';
-            } else {
-                foreach ($groupedPosts[$postGroupType->id] as $post) {
-                    echo '<a href="'.route('post.show', ['post' => $post->id]).'">[';
-                    echo $post->text_parsed;
-                    echo ']</a>';
-                    echo '<br>';
-                }
-                echo '<a href="'.route('post.create', ['postGroup' => $postGroupType->id]).'">add item</a>';
-                echo '<br>';
+            if ($postGroupType->id) {
+                $groupedPosts[$postGroupType->id] = $groupedPosts[$postGroupType->id]
+                    ->filter(function ($post) {
+                        return object_get($post->images->first(), 'path');
+                    })
+                    ->sortByDesc('created_at')
+                    ->take(5);
             }
         }
+
+        return view('post.index', ['postGroupTypes' => $postGroupTypes, 'groupedPosts' => $groupedPosts]);
     }
 
     /**

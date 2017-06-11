@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="topMenu">
-    <div class="topMenuLogo">aboo</div>
+    <div class="topMenuLogo"><a href="/">aboo</a></div>
     @if (Auth::guest())
         <div class="topMenuLogin">
             <a href="{{ route('login') }}">Login</a>
@@ -28,5 +28,6 @@
 </div>
 @yield('controllers')
 @yield('content')
+<script src="/js/main.js"></script>
 </body>
 </html>
