@@ -1,7 +1,18 @@
 @extends('layouts.master')
 
+@section('title'){{ $post->text }}@endsection
+
+@section('meta')
+<meta property="og:title" content="{{ $post->text }}">
+@if(object_get($post->images->first(), 'path'))
+<meta property="og:image" content="<?= \Storage::url($post->images->first()->path) ?>">
+@endif
+<meta property="og:url" content="{{ route('post.show', ['post' => $post->id]) }}">
+<meta property="og:site_name" content="aboo">
+@endsection
+
 @section('header')
-    <p>Back to <a href="{{ route('collection', ['postGroup' => $post->post_group_id]) }}">Collection</a></p>
+    <p><a href="{{ route('collection', ['postGroup' => $post->post_group_id]) }}">Back to Collection</a></p>
     <h1></h1>
 @endsection
 

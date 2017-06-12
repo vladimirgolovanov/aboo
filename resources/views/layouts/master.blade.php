@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" type="text/css" href="/css/master.css">
-    <title></title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" type="text/css" href="/css/master.css">
+<title>@yield('title')</title>
+@yield('meta')
 </head>
 <body>
 <div class="topMenu">

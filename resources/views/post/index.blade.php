@@ -1,14 +1,5 @@
 @extends('layouts.master')
 
-@section('header')
-    <h1></h1>
-@endsection
-
-@section('controllers')
-<div class="controllers">
-</div>
-@endsection
-
 @section('content')
 
     {{-- todo: refactor to less php --}}
