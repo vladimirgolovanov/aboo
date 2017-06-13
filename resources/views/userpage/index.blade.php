@@ -1,12 +1,13 @@
 @extends('layouts.master')
 
+@section('header')
+    <h1>{{ $user->username }}</h1>
+@endsection
+
 @section('content')
 
-    {{-- todo: refactor to less php --}}
     @foreach($postGroupTypes as $postGroupType)
-        @if(!$postGroupType->id)
-            <a href="{{ route('post.create_post_group', ['postGroupType' => $postGroupType->post_group_type_id]) }}">create group</a>
-        @elseif(array_get($groupedPosts, $postGroupType->id))
+        @if(array_get($groupedPosts, $postGroupType->id))
             @if($postGroupType->post_group_type_id == 1)
                 <h2><a href="{{ route('collection', ['postGroup' => $postGroupType->id]) }}">{{ $postGroupType->name }}</a></h2>
             @elseif($postGroupType->post_group_type_id == 2)
@@ -21,8 +22,6 @@
                 ></a>
             @endforeach
             </div>
-        @else
-            create group {{-- todo: go to create item --}}
         @endif
     @endforeach
 

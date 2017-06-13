@@ -6,9 +6,11 @@ use App\Post;
 use App\PostGroup;
 use App\PostGroupType;
 use App\Image;
+use App\User;
 use Illuminate\Http\Request;
 use \Illuminate\Support\Facades\Storage;
 use Auth;
+use HashTagger\HashTagger;
 
 class PostController extends Controller
 {
@@ -17,7 +19,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $postGroupTypes = PostGroupType::select('post_groups.id', 'post_group_types.name', 'post_groups.post_group_type_id')
+        $postGroupTypes = PostGroupType::select('post_groups.id as id', 'post_group_types.name as name', 'post_group_types.id as post_group_type_id')
                                        ->leftJoin('post_groups', 'post_group_types.id', '=', 'post_groups.post_group_type_id')
                                        ->where('post_groups.user_id', Auth::id())
                                        ->orWhereNull('post_groups.user_id')
@@ -28,7 +30,7 @@ class PostController extends Controller
         $groupedPosts = $posts->groupBy('post_group_id');
 
         foreach ($postGroupTypes as $postGroupType) {
-            if ($postGroupType->id) {
+            if ($postGroupType->id and array_get($groupedPosts, $postGroupType->id)) {
                 $groupedPosts[$postGroupType->id] = $groupedPosts[$postGroupType->id]
                     ->filter(function ($post) {
                         return object_get($post->images->first(), 'path');
@@ -39,6 +41,38 @@ class PostController extends Controller
         }
 
         return view('post.index', ['postGroupTypes' => $postGroupTypes, 'groupedPosts' => $groupedPosts]);
+    }
+
+    public function userpage($username)
+    {
+        if (!$username) {
+            return false; // add exception
+        }
+
+        $user = User::where('username', $username)->first();
+
+        $postGroupTypes = PostGroupType::select('post_groups.id as id', 'post_group_types.name as name', 'post_group_types.id as post_group_type_id')
+                                       ->leftJoin('post_groups', 'post_group_types.id', '=', 'post_groups.post_group_type_id')
+                                       ->where('post_groups.user_id', Auth::id())
+                                       ->orWhereNull('post_groups.user_id')
+                                       ->get();
+
+        $posts = Post::whereIn('post_group_id', $postGroupTypes->pluck('id')->toArray())
+                     ->get();
+        $groupedPosts = $posts->groupBy('post_group_id');
+
+        foreach ($postGroupTypes as $postGroupType) {
+            if ($postGroupType->id and array_get($groupedPosts, $postGroupType->id)) {
+                $groupedPosts[$postGroupType->id] = $groupedPosts[$postGroupType->id]
+                    ->filter(function ($post) {
+                        return object_get($post->images->first(), 'path');
+                    })
+                    ->sortByDesc('created_at')
+                    ->take(5);
+            }
+        }
+
+        return view('userpage.index', compact('postGroupTypes', 'groupedPosts', 'user'));
     }
 
     /**
@@ -53,7 +87,7 @@ class PostController extends Controller
             ]
         );
 
-        return redirect()->route('post/create', ['postGroup' => $postGroup]);
+        return redirect()->route('post.create', ['postGroup' => $postGroup]);
     }
 
     public function create(PostGroup $postGroup)
@@ -148,7 +182,10 @@ class PostController extends Controller
 
         $post = Post::find($postId);
         $post->text = $input['text'];
-        $post->text_parsed = nl2br($input['text']);
+        //$post->text_parsed = nl2br($input['text']);
+        $tagger = new HashTagger($post->text);
+        $post->text_parsed = $tagger->wrap_tags("a", ["href" => "/tag/{tag}", "class" => "hashtag"]);
+        $post->text_parsed = nl2br($post->text_parsed);
         $post->save();
 
         return response()->json([

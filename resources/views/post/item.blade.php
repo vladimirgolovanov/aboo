@@ -12,7 +12,11 @@
 @endsection
 
 @section('header')
-    <p><a href="{{ route('collection', ['postGroup' => $post->post_group_id]) }}">Back to Collection</a></p>
+    @if($post->postGroup->post_group_type_id === 1)
+        <p><a href="{{ route('collection', ['postGroup' => $post->post_group_id]) }}">Back to collection</a></p>
+    @elseif($post->postGroup->post_group_type_id === 2)
+        <p><a href="{{ route('wishlist', ['postGroup' => $post->post_group_id]) }}">Back to wishlist</a></p>
+    @endif
     <h1></h1>
 @endsection
 
@@ -38,6 +42,8 @@
         {{ $errors->first('text') }}
     @endif
 
+    <?= htmlspecialchars($post->text_parsed) ?>
+
     <div class="editImages js-image_items">
         @foreach($postImages as $postImage)
             <div class="editImage js-image_item">
@@ -59,5 +65,4 @@
         </div></div>
 
 </form>
-
 @endsection
