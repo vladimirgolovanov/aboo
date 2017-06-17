@@ -15,8 +15,14 @@ Route::post('post/upload_image', ['as' => 'post.upload_image', 'uses' => 'PostCo
 Route::post('post/save_text', ['as' => 'post.save_text', 'uses' => 'PostController@saveText']);
 
 Route::get('/collection/{postGroup}', ['as' => 'collection', 'uses' => 'CollectionController@group']);
+Route::get('/collection/{postGroup}/{type}', 'CollectionController@group')
+     ->where('type', 'archive')
+     ->name('collection.archive');
 
 Route::get('/wishlist/{postGroup}', 'WishlistController@group')->name('wishlist');
 Route::get('/wishlist/{postGroup}/tag/{tag}', 'WishlistController@tag')->name('wishlist.tag');
+Route::get('/wishlist/{postGroup}/{type}', 'WishlistController@group')
+     ->where('type', 'archive')
+     ->name('wishlist.archive');
 
 Route::get('/user/{username}', 'PostController@userpage')->name('userpage');

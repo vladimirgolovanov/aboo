@@ -7,15 +7,22 @@ use App\PostGroup;
 use App\Models\Tags\Tag;
 use App\Http\Controllers\PostController;
 use Illuminate\Http\Request;
+use App\Scopes\ArchiveScope;
 
 class WishlistController extends PostController
 {
-    public function group(PostGroup $postGroup)
+    public function group(PostGroup $postGroup, $type = null)
     {
-        $posts = Post::where('post_group_id', $postGroup->id)
-            ->get();
+        if ($type === 'archive') {
+            $posts = Post::where('post_group_id', $postGroup->id)
+                ->withoutGlobalScopes([ArchiveScope::class])
+                ->whereNotNull('archived_at')
+                ->get();
+        } else {
+            $posts = Post::where('post_group_id', $postGroup->id)->get();
+        }
 
-        return view('wishlist.index', ['posts' => $posts, 'postGroup' => $postGroup]);
+        return view('wishlist.index', compact('posts', 'postGroup', 'type'));
     }
 
     public function tag(PostGroup $postGroup, $tagName)
@@ -28,6 +35,6 @@ class WishlistController extends PostController
                      ->where('post_tag.post_group_id', $postGroup->id)
                      ->get();
 
-        return view('wishlist.index', ['posts' => $posts, 'postGroup' => $postGroup, 'tag' => $tag]);
+        return view('wishlist.index', compact('posts', 'postGroup', 'tag'));
     }
 }

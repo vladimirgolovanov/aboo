@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Scopes\ArchiveScope;
 
 class Post extends Model
 {
@@ -14,6 +15,13 @@ class Post extends Model
         'text',
         'text_parsed',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::addGlobalScope(new ArchiveScope);
+    }
 
     public function images()
     {

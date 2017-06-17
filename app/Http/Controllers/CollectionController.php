@@ -9,11 +9,21 @@ use Illuminate\Http\Request;
 
 class CollectionController extends PostController
 {
-    public function group(PostGroup $postGroup)
+    /**
+     * @todo: Post::getGroupPosts(PostGroup $postGroup, $type)
+     */
+    public function group(PostGroup $postGroup, $type = null)
     {
-        $posts = Post::where('post_group_id', $postGroup->id)
-            ->get();
+        if ($type) {
+            $posts = Post::where('post_group_id', $postGroup->id)
+                ->withoutGlobalScopes([ArchiveScope::class])
+                ->whereNotNull('archived_at')
+                ->get();
+        } else {
+            $posts = Post::where('post_group_id', $postGroup->id)
+                ->get();
+        }
 
-        return view('collection.index', ['posts' => $posts, 'postGroup' => $postGroup]);
+        return view('collection.index', compact('posts', 'postGroup', 'type'));
     }
 }

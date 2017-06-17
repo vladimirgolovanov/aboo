@@ -11,6 +11,7 @@ use App\Models\Tags\Tag;
 use Illuminate\Http\Request;
 use \Illuminate\Support\Facades\Storage;
 use Auth;
+use DB;
 use HashTagger\HashTagger;
 
 class PostController extends Controller
@@ -236,6 +237,11 @@ class PostController extends Controller
 
     public function archivePost(Post $post)
     {
+        if (!$post->archived_at) {
+            $post->archived_at = DB::raw('NOW()');
+            $post->save();
+        }
+
         return response()->json([
             'success' => 'success'
         ]);
