@@ -5,9 +5,11 @@
 @endsection
 
 @section('controllers')
-<div class="controllers">
-    <a href="{{ route('post.create', ['postGroup' => $postGroup]) }}" class="controllersButton">add item</a>
-</div>
+    @can('edit', $postGroup)
+    <div class="controllers">
+        <a href="{{ route('post.create', ['postGroup' => $postGroup]) }}" class="controllersButton">add item</a>
+    </div>
+    @endcan
 @endsection
 
 @section('content')

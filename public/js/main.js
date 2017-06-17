@@ -42,7 +42,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
             request.onload = function() {
                 console.log('Request Status', request.status, request.response);
+                document.querySelector('.js-textarea_alert').innerHTML = 'saved';
             };
+            setTimeout(function () {
+                document.querySelector('.js-textarea_alert').innerHTML = '';
+            }, 3000);
 
             // todo: add 'saved' + timeout fadeout
         }, 3000);

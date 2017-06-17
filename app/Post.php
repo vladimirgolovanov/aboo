@@ -20,6 +20,11 @@ class Post extends Model
         return $this->hasMany('App\Image');
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany('App\Models\Tags\Tag');
+    }
+
     public function postGroup()
     {
         return $this->belongsTo('App\PostGroup');

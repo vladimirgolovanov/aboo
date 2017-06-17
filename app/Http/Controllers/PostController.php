@@ -7,6 +7,7 @@ use App\PostGroup;
 use App\PostGroupType;
 use App\Image;
 use App\User;
+use App\Models\Tags\Tag;
 use Illuminate\Http\Request;
 use \Illuminate\Support\Facades\Storage;
 use Auth;
@@ -53,7 +54,7 @@ class PostController extends Controller
 
         $postGroupTypes = PostGroupType::select('post_groups.id as id', 'post_group_types.name as name', 'post_group_types.id as post_group_type_id')
                                        ->leftJoin('post_groups', 'post_group_types.id', '=', 'post_groups.post_group_type_id')
-                                       ->where('post_groups.user_id', Auth::id())
+                                       ->where('post_groups.user_id', $user->id)
                                        ->orWhereNull('post_groups.user_id')
                                        ->get();
 
@@ -120,7 +121,13 @@ class PostController extends Controller
     {
         $postImages = $post->images()->get();
 
-        return view('post.item', ['post' => $post, 'postImages' => $postImages]);
+        $user = Auth::user();
+
+        if ($user and $user->can('edit', $post)) {
+            return view('post.item', ['post' => $post, 'postImages' => $postImages]);
+        } else {
+            return view('post.show', ['post' => $post, 'postImages' => $postImages]);
+        }
     }
 
     public function update(Request $request, Post $post)
@@ -182,11 +189,24 @@ class PostController extends Controller
 
         $post = Post::find($postId);
         $post->text = $input['text'];
-        //$post->text_parsed = nl2br($input['text']);
         $tagger = new HashTagger($post->text);
-        $post->text_parsed = $tagger->wrap_tags("a", ["href" => "/tag/{tag}", "class" => "hashtag"]);
+        // todo: move href out of here
+        $post->text_parsed = $tagger->wrap_tags("a", [
+            "href" => "/wishlist/".$post->post_group_id."/tag/{tag}",
+            "class" => "hashtag"
+        ]);
         $post->text_parsed = nl2br($post->text_parsed);
         $post->save();
+
+        $post->tags()->detach();
+
+        foreach ($tagger->get_tags() as $tagName) {
+            // todo: prepare tag is better in hashtags class
+            $tagName = mb_strtolower($tagName);
+            $tagName = mb_substr($tagName, 1);
+            $tag = Tag::firstOrCreate(['name' => $tagName]);
+            $post->tags()->attach($tag, ['post_group_id' => $post->post_group_id]);
+        }
 
         return response()->json([
             'success' => 'success'
@@ -209,6 +229,13 @@ class PostController extends Controller
 
         $image->delete();
 
+        return response()->json([
+            'success' => 'success'
+        ]);
+    }
+
+    public function archivePost(Post $post)
+    {
         return response()->json([
             'success' => 'success'
         ]);

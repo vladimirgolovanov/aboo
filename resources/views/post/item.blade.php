@@ -38,11 +38,12 @@
         rows="5"
         placeholder="Description"
     >{{ $post->text }}</textarea>
+    <div class="js-textarea_alert"></div>
     @if ($errors->has('text'))
         {{ $errors->first('text') }}
     @endif
 
-    <?= htmlspecialchars($post->text_parsed) ?>
+    {!! $post->text_parsed !!}
 
     <div class="editImages js-image_items">
         @foreach($postImages as $postImage)
