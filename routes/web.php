@@ -13,6 +13,7 @@ Route::get('/', ['as' => 'post.index', 'uses' => 'PostController@index']);
 Route::get('post/archive/{post}', ['as' => 'post.archive', 'uses' => 'PostController@archivePost']);
 Route::post('post/upload_image', ['as' => 'post.upload_image', 'uses' => 'PostController@uploadImage']);
 Route::post('post/save_text', ['as' => 'post.save_text', 'uses' => 'PostController@saveText']);
+Route::post('post/save_post_group_header', ['as' => 'post.save_post_group_header', 'uses' => 'PostController@savePostGroupHeader']);
 
 Route::get('/collection/{postGroup}', ['as' => 'collection', 'uses' => 'CollectionController@group']);
 Route::get('/collection/{postGroup}/{type}', 'CollectionController@group')

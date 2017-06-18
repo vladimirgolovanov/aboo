@@ -1,7 +1,15 @@
 @extends('layouts.master')
 
 @section('header')
-    <h1>Collection</h1>
+    <h1>{{ $postGroup->name or 'Collection' }}</h1>
+    @can('edit', $postGroup)
+    {{ csrf_field() }}
+    <input type="hidden" name="post_group_id" value="{{ $postGroup->id }}">
+    <div class="editHeaderInput js-edit_header_input">
+        <input type="text" name="name" value="{{ $postGroup->name or 'Collection' }}">
+    </div>
+    <div class="editHeader js-edit_header_icon"></div>
+    @endcan
 @endsection
 
 @section('controllers')

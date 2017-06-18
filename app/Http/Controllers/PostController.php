@@ -214,6 +214,25 @@ class PostController extends Controller
         ]);
     }
 
+    public function savePostGroupHeader(Request $request)
+    {
+        $input = $request->all();
+        $postGroupId = $input['post_group_id'];
+        $name = $input['name'];
+
+        if (!$postGroupId) {
+            return false; // add exception
+        }
+
+        $postGroup = PostGroup::find($postGroupId);
+        $postGroup->name = $input['name'];
+        $postGroup->save();
+
+        return response()->json([
+            'success' => 'success'
+        ]);
+    }
+
     public function destroy(Post $post)
     {
         //

@@ -1,14 +1,21 @@
 @extends('layouts.master')
 
 @section('header')
-    <h1>
     @if(!empty($tag))
-        <a href="{{ route('wishlist', ['postGroup' => $postGroup]) }}">Wishlist</a>
-        #{{ $tag->name }}
+            <a href="{{ route('wishlist', ['postGroup' => $postGroup]) }}">{{ $postGroup->name }}</a>
+            #{{ $tag->name }}
+        </h1>
     @else
-        Wishlist
+        <h1>{{ $postGroup->name or 'Wishlist' }}</h1>
+        @can('edit', $postGroup)
+        {{ csrf_field() }}
+        <input type="hidden" name="post_group_id" value="{{ $postGroup->id }}">
+        <div class="editHeaderInput js-edit_header_input">
+            <input type="text" name="name" value="{{ $postGroup->name or 'Wishlist' }}">
+        </div>
+        <div class="editHeader js-edit_header_icon"></div>
+        @endcan
     @endif
-    </h1>
 @endsection
 
 @section('controllers')
